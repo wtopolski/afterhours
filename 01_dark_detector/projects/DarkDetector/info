@@ -1,0 +1,220 @@
+{
+  "uuid": "0fedef8c24b416c1e9f9dc74945cc310",
+  "path": "Offline/DarkDetector",
+  "name": "DarkDetector",
+  "content": "",
+  "created_at": "2025-12-07 19:38:25",
+  "updated_at": "2025-12-07 22:01:53",
+  "stick": "",
+  "documents": [
+    {
+      "uuid": "27d1a62e18636f40feb1e3ac19e81ab0",
+      "title": "Sheet_DarkDetector",
+      "description": "",
+      "docType": "1",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "0f2b003180194315a7c5e19290cd3c50": 1,
+        "bb009484ef804a24ac5d18c54b249586": 2,
+        "7fac6cd9fcc148d59c4876e0acbaaf0b": 1,
+        "5cbe824183374fac8e4c1ae848199ce3": 1,
+        "2492914011ed49eba6f5941d8f5398f4": 1
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "ARK2",
+          1,
+          "ARK2",
+          "CON1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "RED",
+          1,
+          "LED",
+          "LED",
+          {
+            "Manufacturer Part": "19-217/R6C-AL1M2VY/3T",
+            "Manufacturer": "EVERLIGHT(台湾亿光)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C72044"
+          }
+        ],
+        [
+          "BC546B",
+          1,
+          "BC546B",
+          "Q1",
+          {
+            "Manufacturer Part": "BC337",
+            "Manufacturer": "CJ",
+            "Supplier": "LCSC",
+            "Supplier Part": "C154963"
+          }
+        ],
+        [
+          "10k",
+          1,
+          "R-THT0207-10",
+          "R1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "220",
+          1,
+          "R-THT0207-10",
+          "R2",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "Fotoresistor",
+          1,
+          "FOTORESISTOR",
+          "U1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ]
+      ],
+      "updateTime": 1765139670,
+      "createTime": 1765132705,
+      "histories": [],
+      "created_at": "2025-12-07 19:38:25",
+      "updated_at": "2025-12-07 21:34:30"
+    },
+    {
+      "uuid": "1bba4da170fa708fffa502bd6b9a9a83",
+      "puuid": "0fedef8c24b416c1e9f9dc74945cc310",
+      "title": "PCB_DarkDetector",
+      "filename": "PCB_DarkDetector.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "9d93b56b242b4e7d897ab66ab9dc15a0": 1,
+        "cb5628c1cf4241baa48bf12ca192cd30": 1,
+        "2858cb0a019941bfbd734b3d7107ef3a": 1,
+        "71dde2cdfe4546d99fa1f08202213d8a": 2,
+        "3cc8aa6f51204cabad9c8eb79ef718af": 1
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "ARK2",
+          1,
+          "ARK2",
+          "CON1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "RED",
+          1,
+          "LED",
+          "LED",
+          {
+            "Manufacturer Part": "19-217/R6C-AL1M2VY/3T",
+            "Manufacturer": "EVERLIGHT(台湾亿光)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C72044"
+          }
+        ],
+        [
+          "BC546B",
+          1,
+          "BC546B",
+          "Q1",
+          {
+            "Manufacturer Part": "BC337",
+            "Manufacturer": "CJ",
+            "Supplier": "LCSC",
+            "Supplier Part": "C154963"
+          }
+        ],
+        [
+          "10k",
+          1,
+          "R-THT0207-10",
+          "R1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "220",
+          1,
+          "R-THT0207-10",
+          "R2",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "Fotoresistor",
+          1,
+          "FOTORESISTOR",
+          "U1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ]
+      ],
+      "updateTime": 1765140976,
+      "createTime": 1765140004,
+      "histories": [],
+      "created_at": "2025-12-07 21:40:04",
+      "updated_at": "2025-12-07 21:56:16"
+    }
+  ],
+  "sort": [],
+  "title": "DarkDetector",
+  "foldername": "DarkDetector",
+  "schfilename": "DarkDetector.json",
+  "schfilemtime": 1765141313013
+}
