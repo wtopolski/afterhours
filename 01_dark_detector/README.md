@@ -187,3 +187,8 @@ The base current controls the collector current — standard BJT behavior.
 - Microcontroller interface
 
 ---
+
+![image](https://github.com/wtopolski/afterhours/blob/main/01_dark_detector/easyeda.png)
+![image](https://github.com/wtopolski/afterhours/blob/main/01_dark_detector/pcb_render_2d.png)
+![image](https://github.com/wtopolski/afterhours/blob/main/01_dark_detector/pcb_render_3d.png)
+
