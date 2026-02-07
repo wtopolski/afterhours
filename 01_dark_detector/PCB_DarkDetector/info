@@ -4,7 +4,7 @@
   "name": "DarkDetector",
   "content": "",
   "created_at": "2025-12-07 19:38:25",
-  "updated_at": "2025-12-07 22:01:53",
+  "updated_at": "2025-12-16 19:54:49",
   "stick": "",
   "documents": [
     {
@@ -19,7 +19,7 @@
         "bb009484ef804a24ac5d18c54b249586": 2,
         "7fac6cd9fcc148d59c4876e0acbaaf0b": 1,
         "5cbe824183374fac8e4c1ae848199ce3": 1,
-        "2492914011ed49eba6f5941d8f5398f4": 1
+        "881e7224e9974c52ad2613db2e264eab": 1
       },
       "BOM": [
         [
@@ -28,18 +28,6 @@
           "Package",
           "Components",
           "CustomPara"
-        ],
-        [
-          "ARK2",
-          1,
-          "ARK2",
-          "CON1",
-          {
-            "Manufacturer Part": "",
-            "Manufacturer": "",
-            "Supplier": "",
-            "Supplier Part": ""
-          }
         ],
         [
           "RED",
@@ -100,16 +88,28 @@
             "Supplier": "",
             "Supplier Part": ""
           }
+        ],
+        [
+          "PiHut USBC Board usb07b",
+          1,
+          "PIHUT USBC BOARD USB07B",
+          "U2",
+          {
+            "Manufacturer Part": "usb07b",
+            "Manufacturer": "PiHut",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
         ]
       ],
-      "updateTime": 1765139670,
+      "updateTime": 1765909716,
       "createTime": 1765132705,
       "histories": [],
       "created_at": "2025-12-07 19:38:25",
-      "updated_at": "2025-12-07 21:34:30"
+      "updated_at": "2025-12-16 19:28:36"
     },
     {
-      "uuid": "1bba4da170fa708fffa502bd6b9a9a83",
+      "uuid": "0018aaa579496ce364ef675071ff7b30",
       "puuid": "0fedef8c24b416c1e9f9dc74945cc310",
       "title": "PCB_DarkDetector",
       "filename": "PCB_DarkDetector.json",
@@ -118,11 +118,11 @@
       "master": "",
       "thumb": "/images/thumb-default.png",
       "components": {
-        "9d93b56b242b4e7d897ab66ab9dc15a0": 1,
         "cb5628c1cf4241baa48bf12ca192cd30": 1,
         "2858cb0a019941bfbd734b3d7107ef3a": 1,
         "71dde2cdfe4546d99fa1f08202213d8a": 2,
-        "3cc8aa6f51204cabad9c8eb79ef718af": 1
+        "3cc8aa6f51204cabad9c8eb79ef718af": 1,
+        "c7717a7ce54f41b384698c0e341a3e96": 1
       },
       "BOM": [
         [
@@ -131,18 +131,6 @@
           "Package",
           "Components",
           "CustomPara"
-        ],
-        [
-          "ARK2",
-          1,
-          "ARK2",
-          "CON1",
-          {
-            "Manufacturer Part": "",
-            "Manufacturer": "",
-            "Supplier": "",
-            "Supplier Part": ""
-          }
         ],
         [
           "RED",
@@ -203,18 +191,33 @@
             "Supplier": "",
             "Supplier Part": ""
           }
+        ],
+        [
+          "PiHut USBC Board usb07b",
+          1,
+          "PIHUT USBC BOARD USB07B",
+          "U2",
+          {
+            "Manufacturer Part": "usb07b",
+            "Manufacturer": "PiHut",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
         ]
       ],
-      "updateTime": 1765140976,
-      "createTime": 1765140004,
+      "updateTime": 1765911289,
+      "createTime": 1765910061,
       "histories": [],
-      "created_at": "2025-12-07 21:40:04",
-      "updated_at": "2025-12-07 21:56:16"
+      "created_at": "2025-12-16 19:34:21",
+      "updated_at": "2025-12-16 19:54:49"
     }
   ],
-  "sort": [],
+  "sort": [
+    "27d1a62e18636f40feb1e3ac19e81ab0",
+    "0c6520ef87028e6d02a7acafaa74f87b"
+  ],
   "title": "DarkDetector",
   "foldername": "DarkDetector",
   "schfilename": "DarkDetector.json",
-  "schfilemtime": 1765141313013
+  "schfilemtime": 1765909716593
 }
