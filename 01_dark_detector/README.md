@@ -191,4 +191,7 @@ The base current controls the collector current — standard BJT behavior.
 ![image](https://github.com/wtopolski/afterhours/blob/main/01_dark_detector/easyeda.png)
 ![image](https://github.com/wtopolski/afterhours/blob/main/01_dark_detector/pcb_render_2d.png)
 ![image](https://github.com/wtopolski/afterhours/blob/main/01_dark_detector/pcb_render_3d.png)
+![image](https://github.com/wtopolski/afterhours/blob/main/01_dark_detector/PXL_20260122_115232464.png)
+![image](https://github.com/wtopolski/afterhours/blob/main/01_dark_detector/PXL_20260122_115250926.png)
+![image](https://github.com/wtopolski/afterhours/blob/main/01_dark_detector/PXL_20260207_194341496.png)
 
