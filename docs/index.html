@@ -16,9 +16,9 @@
   </nav>
 
   <header class="hero">
-    <div class="tag">electronics / hardware</div>
+    <div class="tag">electronics / software / ai</div>
     <h1>afterhours</h1>
-    <p>A collection of personal electronics projects &mdash; circuits, PCBs, and enclosures built after hours.</p>
+    <p>A collection of personal projects &mdash; circuits, PCBs, AI agents, and code experiments built after hours.</p>
   </header>
 
   <section id="projects">
@@ -43,11 +43,34 @@
         </a>
       </div>
 
+      <!-- PROJECT 02 -->
+      <div class="project-card">
+        <a href="02_koog/">
+          <div class="thumb thumb-placeholder">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+              <rect x="8" y="16" width="64" height="48" rx="4" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="28" cy="40" r="8" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M40 32h24M40 40h20M40 48h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M24 28l8 8m0-8l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="info">
+            <div class="number">02</div>
+            <h3>Koog AI Agents</h3>
+            <div class="desc">Kotlin samples exploring the Koog AI agents framework with local LLMs via Ollama and LM Studio.</div>
+            <div class="meta">
+              <span>kotlin</span>
+              <span>koog</span>
+              <span>ollama</span>
+            </div>
+          </div>
+        </a>
+      </div>
+
       <!--
-        To add a new project, copy the block above and update:
-        - href to the project subdirectory (e.g. "02_project_name/")
-        - image src to a representative photo
-        - number, title, description, and meta tags
+        To add a new project, copy a card block above and update:
+        - href, number, title, description, and meta tags
+        - Use <img class="thumb"> for image or <div class="thumb thumb-placeholder"> for SVG icon
 
         Then create docs/<project>/index.html using the project page template.
       -->

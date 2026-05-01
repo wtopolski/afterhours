@@ -1,3 +1,13 @@
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+
+# Gradle
+.gradle/
+build/
+
 # Prerequisites
 *.d
 
