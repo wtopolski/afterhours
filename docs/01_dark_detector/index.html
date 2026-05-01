@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Detector — afterhours</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <nav>
+    <div class="brand"><a href="../">afterhours</a> / <span>01</span> dark_detector</div>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#schematic">Schematic</a></li>
+      <li><a href="#bom">BOM</a></li>
+      <li><a href="#pcb">PCB</a></li>
+      <li><a href="#build">Build</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="tag">afterhours / project 01</div>
+    <h1>Dark Detector</h1>
+    <p>A USB-C powered light-dependent LED driver. The circuit senses ambient light through a photoresistor and activates an LED in darkness &mdash; a minimal analog night-light.</p>
+  </header>
+
+  <!-- OVERVIEW -->
+  <section id="overview">
+    <div class="section-label">Overview</div>
+    <h2>How it works</h2>
+    <p>A photoresistor and a 10k&Omega; resistor form a voltage divider that controls the base of a BC546B NPN transistor. In darkness the LDR resistance rises, forward-biasing the transistor, which switches on the LED through a 220&Omega; current-limiting resistor.</p>
+
+    <div class="operation-grid">
+      <div class="op-card">
+        <h3><span class="indicator off"></span> Bright</h3>
+        <p>LDR resistance is low. Voltage divider pulls the base below 0.7V threshold. Transistor is cut off.</p>
+        <div class="state">LED &rarr; OFF</div>
+      </div>
+      <div class="op-card">
+        <h3><span class="indicator on"></span> Dark</h3>
+        <p>LDR resistance is high. Base voltage rises above 0.7V. Transistor saturates and current flows through the LED.</p>
+        <div class="state">LED &rarr; ON</div>
+      </div>
+    </div>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="label">Supply</div>
+        <div class="value">5<span class="unit">V USB-C</span></div>
+      </div>
+      <div class="spec">
+        <div class="label">LED Current</div>
+        <div class="value">~12.7<span class="unit">mA</span></div>
+      </div>
+      <div class="spec">
+        <div class="label">Base Current</div>
+        <div class="value">~0.05<span class="unit">mA</span></div>
+      </div>
+      <div class="spec">
+        <div class="label">Components</div>
+        <div class="value">6</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCHEMATIC -->
+  <section id="schematic">
+    <div class="section-label">Schematic</div>
+    <h2>Circuit design</h2>
+    <p>Designed in EasyEDA. The circuit uses only VBUS and GND from the USB-C breakout &mdash; no data lines required.</p>
+
+    <div class="schematic-img">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/01_dark_detector/sheet.png" alt="Circuit schematic">
+    </div>
+
+    <div class="formula-block">
+      V_R2 = 5.0V &minus; 2.0V &minus; 0.2V = 2.8V<br>
+      I_LED = 2.8V / 220&Omega; = <span class="result">12.7 mA</span><br><br>
+      I_B = (1.2V &minus; 0.7V) / 10k&Omega; = 0.05 mA<br>
+      I_C = &beta; &times; I_B = 200 &times; 0.05 = <span class="result">10 mA</span>
+    </div>
+  </section>
+
+  <!-- BOM -->
+  <section id="bom">
+    <div class="section-label">Bill of Materials</div>
+    <h2>Components</h2>
+
+    <table class="bom-table">
+      <thead>
+        <tr>
+          <th>Ref</th>
+          <th>Component</th>
+          <th>Value</th>
+          <th>Package</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>U2</td>
+          <td>USB-C Breakout</td>
+          <td>PiHut usb07b</td>
+          <td>Through-hole</td>
+        </tr>
+        <tr>
+          <td>Q1</td>
+          <td>NPN Transistor</td>
+          <td>BC546B</td>
+          <td>TO-92</td>
+        </tr>
+        <tr>
+          <td>R1</td>
+          <td>Resistor</td>
+          <td>10 k&Omega;</td>
+          <td>THT 0207</td>
+        </tr>
+        <tr>
+          <td>R2</td>
+          <td>Resistor</td>
+          <td>220 &Omega;</td>
+          <td>THT 0207</td>
+        </tr>
+        <tr>
+          <td>U1</td>
+          <td>Photoresistor (LDR)</td>
+          <td>&mdash;</td>
+          <td>Through-hole</td>
+        </tr>
+        <tr>
+          <td>LED</td>
+          <td>LED</td>
+          <td>Red</td>
+          <td>5 mm</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- PCB -->
+  <section id="pcb">
+    <div class="section-label">PCB Design</div>
+    <h2>Board layout</h2>
+    <p>Single-layer through-hole PCB designed in EasyEDA. Gerber files available in the repository for fabrication.</p>
+
+    <div class="gallery renders">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/01_dark_detector/pcb_render_2d.png" alt="PCB 2D render">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/01_dark_detector/pcb_render_3d.png" alt="PCB 3D render">
+    </div>
+  </section>
+
+  <!-- BUILD -->
+  <section id="build">
+    <div class="section-label">Build</div>
+    <h2>Assembly</h2>
+    <p>Soldered board with 3D-printed enclosure designed in OpenSCAD. The case features cutouts for the USB-C cable and cylindrical sleeves for the LED and LDR.</p>
+
+    <div class="gallery">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/01_dark_detector/PXL_20260122_115232464.jpg" alt="Assembled PCB top view">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/01_dark_detector/PXL_20260122_115250926.jpg" alt="Assembled PCB close-up">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/01_dark_detector/PXL_20260207_194341496.jpg" alt="PCB in 3D-printed case">
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>afterhours</span>
+    <a href="https://github.com/wtopolski/afterhours">github.com/wtopolski/afterhours</a>
+  </footer>
+
+</body>
+</html>
