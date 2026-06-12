@@ -24,16 +24,8 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:${ktorVersion}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
     implementation("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
-    implementation ("io.ktor:ktor-server-netty:${ktorVersion}")
 
     implementation("io.modelcontextprotocol:kotlin-sdk:${mcpVersion}")
-
-    testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 kotlin {
@@ -49,7 +41,7 @@ tasks.jar {
 tasks.register<Jar>("fatJar") {
     group = "build"
     description = "Assembles a fat JAR with all dependencies."
-    archiveClassifier.set("all") // produces my-app-1.0-SNAPSHOT-all.jar
+    archiveClassifier.set("all")
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
