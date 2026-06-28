@@ -6,13 +6,18 @@ import ai.koog.prompt.llm.LLMCapability
 import ai.koog.prompt.llm.LLMProvider
 import ai.koog.prompt.llm.LLModel
 
-val llama3_2 = LLModel(
-    provider = LLMProvider.Ollama,
-    id = "llama3.2",
+
+const val LM_STUDIO_BASE_URL = "http://localhost:1234"
+const val LM_STUDIO_MODEL_ID = "qwen/qwen3.5-35b-a3b"
+
+val lm_studio_qwen3_5 = LLModel(
+    provider = LLMProvider.OpenAI,
+    id = LM_STUDIO_MODEL_ID,
     capabilities = listOf(
         LLMCapability.Temperature,
         LLMCapability.Schema.JSON.Simple,
-        LLMCapability.Tools
+        LLMCapability.Tools,
+        LLMCapability.Completion
     )
 )
 

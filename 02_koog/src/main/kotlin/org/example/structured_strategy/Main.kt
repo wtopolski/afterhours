@@ -17,23 +17,20 @@ import org.example.common.ollama_model
 import org.example.structured.SimpleWeatherForecast
 
 fun main(): Unit = runBlocking {
-    val exampleForecasts = listOf(
-        SimpleWeatherForecast(
-            location = "New York",
-            temperature = 25,
-            conditions = "Sunny"
-        ),
-        SimpleWeatherForecast(
-            location = "London",
-            temperature = 18,
-            conditions = "Cloudy"
-        )
-    )
-
-    // Generate JSON Schema
     val forecastStructure = JsonStructuredData.createJsonStructure<SimpleWeatherForecast>(
         schemaFormat = JsonSchemaGenerator.SchemaFormat.JsonSchema,
-        examples = exampleForecasts,
+        examples = listOf(
+            SimpleWeatherForecast(
+                location = "New York",
+                temperature = 25,
+                conditions = "Sunny"
+            ),
+            SimpleWeatherForecast(
+                location = "London",
+                temperature = 18,
+                conditions = "Cloudy"
+            )
+        ),
         schemaType = JsonStructuredData.JsonSchemaType.SIMPLE
     )
 

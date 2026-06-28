@@ -7,26 +7,25 @@ import ai.koog.prompt.structure.json.JsonSchemaGenerator
 import ai.koog.prompt.structure.json.JsonStructuredData
 import kotlinx.coroutines.runBlocking
 import org.example.common.ollama_model
-
+import ai.koog.agents.core.tools.annotations.LLMDescription
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 fun main(): Unit = runBlocking {
-    // Create sample forecasts
-    val exampleForecasts = listOf(
-        SimpleWeatherForecast(
-            location = "New York",
-            temperature = 25,
-            conditions = "Sunny"
-        ),
-        SimpleWeatherForecast(
-            location = "London",
-            temperature = 18,
-            conditions = "Cloudy"
-        )
-    )
-
     val weatherForecastStructure = JsonStructuredData.createJsonStructure<SimpleWeatherForecast>(
         schemaFormat = JsonSchemaGenerator.SchemaFormat.JsonSchema,
-        examples = exampleForecasts,
+        examples = listOf(
+            SimpleWeatherForecast(
+                location = "New York",
+                temperature = 25,
+                conditions = "Sunny"
+            ),
+            SimpleWeatherForecast(
+                location = "London",
+                temperature = 18,
+                conditions = "Cloudy"
+            )
+        ),
         schemaType = JsonStructuredData.JsonSchemaType.SIMPLE
     )
 
@@ -59,3 +58,15 @@ fun main(): Unit = runBlocking {
     println(structuredResponse)
     println(structuredResponse.getOrNull()?.structure)
 }
+
+@Serializable
+@SerialName("SimpleWeatherForecast")
+@LLMDescription("Simple weather forecast for a location")
+data class SimpleWeatherForecast(
+    @property:LLMDescription("Location name")
+    val location: String,
+    @property:LLMDescription("Temperature in Celsius")
+    val temperature: Int,
+    @property:LLMDescription("Weather conditions (e.g., sunny, cloudy, rainy)")
+    val conditions: String
+)

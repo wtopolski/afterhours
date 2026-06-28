@@ -20,14 +20,24 @@ import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.agents.core.tools.ToolResult
 import ai.koog.agents.core.tools.annotations.LLMDescription
 import ai.koog.prompt.dsl.Prompt
-import ai.koog.prompt.executor.llms.all.simpleOllamaAIExecutor
+import ai.koog.prompt.executor.clients.openai.OpenAIClientSettings
+import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
+import ai.koog.prompt.executor.llms.SingleLLMPromptExecutor
 import ai.koog.prompt.message.Message
 import ai.koog.prompt.structure.json.JsonSchemaGenerator
 import ai.koog.prompt.structure.json.JsonStructuredData
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.example.common.LM_STUDIO_BASE_URL
 import org.example.common.commonEventHandler
-import org.example.common.ollama_model
+import org.example.common.lm_studio_qwen3_5
+
+private val lmStudioExecutor = SingleLLMPromptExecutor(
+    OpenAILLMClient(
+        apiKey = "lm-studio",
+        settings = OpenAIClientSettings(baseUrl = LM_STUDIO_BASE_URL)
+    )
+)
 
 @Serializable
 @SerialName("SimpleWeatherForecast")
@@ -71,7 +81,7 @@ val agentStrategy = strategy("Simple calculator") {
         val structuredResponse = llm.writeSession {
             this.requestLLMStructured(
                 structure = operationStructure,
-                fixingModel = ollama_model,
+                fixingModel = lm_studio_qwen3_5,
             )
         }
 
@@ -117,7 +127,7 @@ val agentConfig = AIAgentConfig(
                 """.trimIndent()
         )
     },
-    model = ollama_model,
+    model = lm_studio_qwen3_5,
     maxAgentIterations = 10
 )
 
@@ -201,7 +211,7 @@ val toolRegistry = ToolRegistry {
 
 // Create the agent
 val agent = AIAgent(
-    promptExecutor = simpleOllamaAIExecutor(),
+    promptExecutor = lmStudioExecutor,
     strategy = agentStrategy,
     agentConfig = agentConfig,
     toolRegistry = toolRegistry,
