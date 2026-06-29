@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.1.20"
-    kotlin("plugin.serialization") version "2.1.21"
+    kotlin("jvm") version "2.3.0"
+    kotlin("plugin.serialization") version "2.3.0"
 }
 
 group = "org.example"
@@ -14,7 +14,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.3")
     implementation("io.ktor:ktor-client-content-negotiation:3.0.3")
-    implementation("ai.koog:koog-agents:0.3.0")
+    implementation("io.ktor:ktor-client-cio:3.0.3")
+    implementation("ai.koog:koog-agents:1.0.0")
     testImplementation(kotlin("test"))
 }
 

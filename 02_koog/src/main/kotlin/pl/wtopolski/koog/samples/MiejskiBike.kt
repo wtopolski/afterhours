@@ -1,32 +1,30 @@
 @file:Suppress("MISSING_DEPENDENCY_SUPERCLASS_IN_TYPE_ARGUMENT", "MISSING_DEPENDENCY_SUPERCLASS_WARNING")
 
-package org.example.miejskibike
+package pl.wtopolski.koog.samples
 
-import ai.koog.agents.core.tools.annotations.LLMDescription
-import ai.koog.prompt.structure.json.JsonSchemaGenerator
-import ai.koog.prompt.structure.json.JsonStructuredData
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import ai.koog.agents.core.agent.AIAgent
 import ai.koog.agents.core.agent.config.AIAgentConfig
-import ai.koog.agents.core.dsl.builder.forwardTo
+import ai.koog.agents.core.annotation.InternalAgentsApi
+import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
-import ai.koog.agents.core.dsl.extension.nodeExecuteTool
+import ai.koog.agents.core.dsl.extension.nodeExecuteTools
 import ai.koog.agents.core.dsl.extension.nodeLLMRequest
-import ai.koog.agents.core.dsl.extension.nodeLLMSendToolResult
-import ai.koog.agents.core.dsl.extension.onAssistantMessage
-import ai.koog.agents.core.dsl.extension.onToolCall
+import ai.koog.agents.core.dsl.extension.onTextMessage
+import ai.koog.agents.core.dsl.extension.onToolCalls
+import ai.koog.agents.core.dsl.extension.ReceivedToolResults
 import ai.koog.agents.core.tools.Tool
-import ai.koog.agents.core.tools.ToolArgs
 import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.agents.core.tools.ToolParameterDescriptor
 import ai.koog.agents.core.tools.ToolParameterType
 import ai.koog.agents.core.tools.ToolRegistry
-import ai.koog.agents.core.tools.ToolResult.JSONSerializable
-import ai.koog.agents.ext.tool.SayToUser
-import ai.koog.prompt.dsl.Prompt
-import ai.koog.prompt.executor.llms.all.simpleOllamaAIExecutor
-import ai.koog.prompt.message.Message
+import ai.koog.agents.core.tools.annotations.LLMDescription
+import ai.koog.prompt.Prompt
+import ai.koog.prompt.executor.clients.openai.OpenAIClientSettings
+import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
+import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
+import ai.koog.prompt.llm.LLMProvider
+import ai.koog.serialization.JSONPrimitive
+import ai.koog.serialization.typeToken
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -38,51 +36,52 @@ import io.ktor.client.statement.request
 import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.example.common.ollama_model
+
+private val lmStudioExecutor = MultiLLMPromptExecutor(
+    LLMProvider.OpenAI to OpenAILLMClient(
+        apiKey = "lm-studio",
+        settings = OpenAIClientSettings(baseUrl = LM_STUDIO_BASE_URL)
+    )
+)
 
 // Create a simple strategy
-val agentStrategy = strategy("Bike points Location Assistant of miejski.bike service") {
-    // Define nodes for the strategy
+val mbAgentStrategy = strategy<String, Any>("Bike points Location Assistant of miejski.bike service") {
     val nodeSendInput by nodeLLMRequest()
-    val nodeExecuteTool by nodeExecuteTool()
-    val nodeSendToolResult by nodeLLMSendToolResult()
-
-    val getOperationForecast by node<Message.Response, ResponseDescription> { _ ->
-        val structuredResponse = llm.writeSession {
-            this.requestLLMStructured(
-                structure = bikePointsStructure,
-                fixingModel = ollama_model,
-            )
-        }
-
-        structuredResponse.getOrNull()?.structure ?: ResponseDescription()
+    val nodeExecuteTool by nodeExecuteTools()
+    // Parse ResponseDescription directly from tool results — avoids a second LLM call,
+    // which fails on LM Studio/Qwen because its jinja template can't handle tool_calls history.
+    @OptIn(InternalAgentsApi::class)
+    val nodeParseResult by node<ReceivedToolResults, ResponseDescription> { toolResults ->
+        val toolResult = toolResults.toolResults.firstOrNull() ?: error("No tool result found")
+        val zoneId = (toolResult.toolArgs.entries["zoneId"] as? JSONPrimitive)?.content ?: ""
+        val typeId = (toolResult.toolArgs.entries["typeId"] as? JSONPrimitive)?.content ?: ""
+        val bikeResult = toolResult.resultObject as? BikeResult
+        ResponseDescription(
+            bikeType = typeId,
+            zoneName = zoneId,
+            numberOfPoint = bikeResult?.content?.size ?: 0,
+            bikePoints = bikeResult?.content?.map {
+                BikePointDescription(it.name, it.locationLat, it.locationLng)
+            } ?: emptyList()
+        )
     }
 
+    edge(nodeStart forwardTo nodeSendInput)
+
     edge(
-        nodeStart forwardTo nodeSendInput
+        (nodeSendInput forwardTo nodeFinish) onTextMessage { true }
     )
 
     edge(
-        (nodeSendInput forwardTo nodeFinish) transformed { it } onAssistantMessage { true }
+        (nodeSendInput forwardTo nodeExecuteTool) onToolCalls { true }
     )
 
-    edge(
-        (nodeSendInput forwardTo nodeExecuteTool) onToolCall { true }
-    )
+    edge(nodeExecuteTool forwardTo nodeParseResult)
 
-    edge(
-        nodeExecuteTool forwardTo nodeSendToolResult
-    )
-
-    edge(
-        nodeSendToolResult forwardTo getOperationForecast
-    )
-
-    edge(
-        getOperationForecast forwardTo nodeFinish
-    )
+    edge(nodeParseResult forwardTo nodeFinish)
 }
 
 suspend fun main() {
@@ -99,7 +98,7 @@ suspend fun main() {
                 """.trimIndent()
             )
         },
-        model = ollama_model,
+        model = lm_studio_qwen3_5,
         maxAgentIterations = 10
     )
 
@@ -110,8 +109,8 @@ suspend fun main() {
 
     // Create the agent
     val agent = AIAgent(
-        promptExecutor = simpleOllamaAIExecutor(),
-        strategy = agentStrategy,
+        promptExecutor = lmStudioExecutor,
+        strategy = mbAgentStrategy,
         agentConfig = agentConfig,
         toolRegistry = toolRegistry
     )
@@ -130,11 +129,10 @@ suspend fun main() {
     }
 }
 
-object MiejskiBikeTool : Tool<BikeRequestArgs, BikeResult>() {
-
-    override val argsSerializer = BikeRequestArgs.serializer()
-
-    override val descriptor = ToolDescriptor(
+object MiejskiBikeTool : Tool<BikeRequestArgs, BikeResult>(
+    argsType = typeToken<BikeRequestArgs>(),
+    resultType = typeToken<BikeResult>(),
+    descriptor = ToolDescriptor(
         name = "miejski_bike_content",
         description = "Provide details like names or addresses for specific bike points from miejski.bike service",
         requiredParameters = listOf(
@@ -150,7 +148,7 @@ object MiejskiBikeTool : Tool<BikeRequestArgs, BikeResult>() {
             )
         )
     )
-
+) {
     override suspend fun execute(args: BikeRequestArgs): BikeResult {
         val client = HttpClient(CIO) {
             install(ContentNegotiation) {
@@ -164,7 +162,7 @@ object MiejskiBikeTool : Tool<BikeRequestArgs, BikeResult>() {
             urlString = "https://storage.miejski.bike",
             block = {
                 headers.append(HttpHeaders.ContentType, "application/json")
-                headers.append(HttpHeaders.UserAgent, "PostmanRuntime/7.44.1")
+                headers.append(HttpHeaders.UserAgent, "AI Agent")
                 headers.append(HttpHeaders.AcceptLanguage, "PL-pl")
                 headers.append(HttpHeaders.Authorization, "...")
                 port = 8444
@@ -208,14 +206,12 @@ object MiejskiBikeTool : Tool<BikeRequestArgs, BikeResult>() {
 data class BikeRequestArgs(
     val zoneId: String,
     val typeId: String
-) : ToolArgs
+)
 
 @Serializable
 data class BikeResult(
     val content: List<BikePoint>
-) : JSONSerializable<BikeResult> {
-    override fun getSerializer(): KSerializer<BikeResult> = serializer()
-}
+)
 
 @Serializable
 data class BikePoint(
@@ -295,12 +291,8 @@ val exampleForecasts = listOf(
     )
 )
 
-// Generate JSON Schema
-val bikePointsStructure = JsonStructuredData.createJsonStructure<ResponseDescription>(
-    schemaFormat = JsonSchemaGenerator.SchemaFormat.JsonSchema,
-    examples = exampleForecasts,
-    schemaType = JsonStructuredData.JsonSchemaType.SIMPLE
-)
+// Examples for structured output
+val bikePointsExamples = exampleForecasts
 
 @Serializable
 @SerialName("BikePointDescription")

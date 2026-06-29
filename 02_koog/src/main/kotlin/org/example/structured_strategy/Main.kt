@@ -2,47 +2,40 @@ package org.example.structured_strategy
 
 import ai.koog.agents.core.agent.AIAgent
 import ai.koog.agents.core.agent.config.AIAgentConfig
-import ai.koog.agents.core.dsl.builder.forwardTo
+import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
 import ai.koog.agents.core.dsl.extension.nodeLLMRequest
 import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.prompt.dsl.prompt
-import ai.koog.prompt.executor.llms.all.simpleOllamaAIExecutor
 import ai.koog.prompt.message.Message
-import ai.koog.prompt.structure.json.JsonSchemaGenerator
-import ai.koog.prompt.structure.json.JsonStructuredData
 import kotlinx.coroutines.runBlocking
-import org.example.common.commonEventHandler
-import org.example.common.ollama_model
+import pl.wtopolski.koog.samples.commonEventHandler
+import pl.wtopolski.koog.samples.ollama_model
+import pl.wtopolski.koog.samples.ollamaExecutor
 import org.example.structured.SimpleWeatherForecast
 
 fun main(): Unit = runBlocking {
-    val forecastStructure = JsonStructuredData.createJsonStructure<SimpleWeatherForecast>(
-        schemaFormat = JsonSchemaGenerator.SchemaFormat.JsonSchema,
-        examples = listOf(
-            SimpleWeatherForecast(
-                location = "New York",
-                temperature = 25,
-                conditions = "Sunny"
-            ),
-            SimpleWeatherForecast(
-                location = "London",
-                temperature = 18,
-                conditions = "Cloudy"
-            )
+    val forecastExamples = listOf(
+        SimpleWeatherForecast(
+            location = "New York",
+            temperature = 25,
+            conditions = "Sunny"
         ),
-        schemaType = JsonStructuredData.JsonSchemaType.SIMPLE
+        SimpleWeatherForecast(
+            location = "London",
+            temperature = 18,
+            conditions = "Cloudy"
+        )
     )
 
     // Define the agent strategy
-    val agentStrategy = strategy("weather-forecast") {
+    val agentStrategy = strategy<String, String>("weather-forecast") {
         val setup by nodeLLMRequest()
 
-        val getStructuredForecast by node<Message.Response, String> { _ ->
+        val getStructuredForecast by node<Message.Assistant, String> { _ ->
             val structuredResponse = llm.writeSession {
-                this.requestLLMStructured(
-                    structure = forecastStructure,
-                    fixingModel = ollama_model,
+                this.requestLLMStructured<SimpleWeatherForecast>(
+                    examples = forecastExamples,
                 )
             }
 
@@ -72,7 +65,7 @@ fun main(): Unit = runBlocking {
     )
 
     val runner = AIAgent(
-        promptExecutor = simpleOllamaAIExecutor(),
+        promptExecutor = ollamaExecutor(),
         toolRegistry = ToolRegistry.EMPTY,
         strategy = agentStrategy,
         agentConfig = agentConfig,

@@ -1,38 +1,20 @@
 package org.example.structured
 
 import ai.koog.prompt.dsl.prompt
-import ai.koog.prompt.executor.llms.all.simpleOllamaAIExecutor
-import ai.koog.prompt.structure.executeStructured
-import ai.koog.prompt.structure.json.JsonSchemaGenerator
-import ai.koog.prompt.structure.json.JsonStructuredData
+import ai.koog.prompt.executor.model.StructureFixingParser
+import ai.koog.prompt.executor.model.executeStructured
 import kotlinx.coroutines.runBlocking
-import org.example.common.ollama_model
+import pl.wtopolski.koog.samples.ollama_model
+import pl.wtopolski.koog.samples.ollamaExecutor
 import ai.koog.agents.core.tools.annotations.LLMDescription
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 fun main(): Unit = runBlocking {
-    val weatherForecastStructure = JsonStructuredData.createJsonStructure<SimpleWeatherForecast>(
-        schemaFormat = JsonSchemaGenerator.SchemaFormat.JsonSchema,
-        examples = listOf(
-            SimpleWeatherForecast(
-                location = "New York",
-                temperature = 25,
-                conditions = "Sunny"
-            ),
-            SimpleWeatherForecast(
-                location = "London",
-                temperature = 18,
-                conditions = "Cloudy"
-            )
-        ),
-        schemaType = JsonStructuredData.JsonSchemaType.SIMPLE
-    )
-
-    val promptExecutor = simpleOllamaAIExecutor()
+    val promptExecutor = ollamaExecutor()
 
     // Make an LLM call that returns a structured response
-    val structuredResponse = promptExecutor.executeStructured(
+    val structuredResponse = promptExecutor.executeStructured<SimpleWeatherForecast>(
         // Define the prompt (both system and user messages)
         prompt = prompt("structured-data") {
             system(
@@ -45,18 +27,30 @@ fun main(): Unit = runBlocking {
                 "What is the weather forecast for Skierniewice in Poland?"
             )
         },
-        // Provide the expected data structure to the LLM
-        structure = weatherForecastStructure,
         // Define the main model that will execute the request
-        mainModel = ollama_model,
-        // Set the maximum number of retries to get a proper structured response
-        retries = 5,
-        // Set the LLM used for output coercion (transformation of malformed outputs)
-        fixingModel = ollama_model
+        model = ollama_model,
+        // Provide examples to help the LLM understand the expected format
+        examples = listOf(
+            SimpleWeatherForecast(
+                location = "New York",
+                temperature = 25,
+                conditions = "Sunny"
+            ),
+            SimpleWeatherForecast(
+                location = "London",
+                temperature = 18,
+                conditions = "Cloudy"
+            )
+        ),
+        // Optional fixing parser for malformed responses
+        fixingParser = StructureFixingParser(
+            model = ollama_model,
+            retries = 5
+        )
     )
 
     println(structuredResponse)
-    println(structuredResponse.getOrNull()?.structure)
+    println(structuredResponse.getOrNull()?.data)
 }
 
 @Serializable
