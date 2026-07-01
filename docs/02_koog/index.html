@@ -14,6 +14,8 @@
       <li><a href="#overview">Overview</a></li>
       <li><a href="#samples">Samples</a></li>
       <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#miejskibike">MiejskiBike</a></li>
+      <li><a href="#quirks">Quirks</a></li>
       <li><a href="#setup">Setup</a></li>
     </ul>
   </nav>
@@ -22,31 +24,31 @@
   <header class="hero">
     <div class="tag">afterhours / project 02</div>
     <h1>Koog AI Agents</h1>
-    <p>Kotlin samples exploring the Koog AI agents framework with local LLMs &mdash; tool calling, structured output, custom strategies, and external API integration via Ollama and LM Studio.</p>
+    <p>Kotlin samples exploring the <a href="https://docs.koog.ai/" style="color: var(--accent)">Koog AI agents framework</a> (v1.0.0) with local LLMs via LM Studio and Ollama &mdash; interactive chat, custom tools, structured output, and a live bike-sharing API integration.</p>
   </header>
 
   <!-- OVERVIEW -->
   <section id="overview">
     <div class="section-label">Overview</div>
     <h2>What this is</h2>
-    <p>A set of self-contained Kotlin samples that progressively explore the <a href="https://docs.koog.ai/" style="color: var(--accent)">Koog</a> agent framework &mdash; from a minimal "hello world" agent to a full tool-calling agent that queries a live bike-sharing API and returns structured data.</p>
+    <p>A small set of self-contained Kotlin samples built on top of Koog's node-graph agent runtime. Each file explores one concept &mdash; from a plain chat loop to annotation-based tool sets, JSON-schema-validated structured output, and a live Ktor HTTP tool.</p>
 
     <div class="specs">
       <div class="spec">
         <div class="label">Language</div>
-        <div class="value">Kotlin<span class="unit"> 2.1</span></div>
+        <div class="value">Kotlin<span class="unit"> 2.3</span></div>
       </div>
       <div class="spec">
         <div class="label">Framework</div>
-        <div class="value">Koog<span class="unit"> 0.3.0</span></div>
+        <div class="value">Koog<span class="unit"> 1.0.0</span></div>
       </div>
       <div class="spec">
         <div class="label">Runtime</div>
-        <div class="value">JVM<span class="unit"> 23</span></div>
+        <div class="value">JVM<span class="unit"> 21</span></div>
       </div>
       <div class="spec">
-        <div class="label">Samples</div>
-        <div class="value">6</div>
+        <div class="label">Backends</div>
+        <div class="value">LM Studio<span class="unit"> / Ollama</span></div>
       </div>
     </div>
   </section>
@@ -55,67 +57,56 @@
   <section id="samples">
     <div class="section-label">Samples</div>
     <h2>What's inside</h2>
+    <p>All samples live in <code style="font-family: var(--mono); font-size: 13px; background: var(--bg-elevated); padding: 1px 6px;">src/main/kotlin/pl/wtopolski/koog/samples/</code>.</p>
 
     <div class="sample-grid">
 
       <div class="sample-card">
-        <h3>basic</h3>
-        <p>Minimal agent with a single SayToUser tool. Sends a greeting and gets a response from the LLM.</p>
+        <h3>Chat.kt</h3>
+        <p>Interactive chat loop with <code>/exit</code> to quit. Demonstrates a single-node strategy that keeps calling the LLM inside one <code>llm.writeSession</code>.</p>
         <div class="concepts">
-          <span>AIAgent</span>
-          <span>ToolRegistry</span>
-          <span>SayToUser</span>
+          <span>llm.writeSession</span>
+          <span>appendPrompt</span>
+          <span>requestLLM</span>
         </div>
       </div>
 
       <div class="sample-card">
-        <h3>calc</h3>
-        <p>Calculator agent with custom add/subtract tools. Uses a strategy graph with structured output to return typed results.</p>
+        <h3>Calc.kt</h3>
+        <p>Calculator agent with add/subtract tools defined via annotations on a <code>ToolSet</code>. Parses results directly from <code>ReceivedToolResults</code>.</p>
         <div class="concepts">
-          <span>Custom Tool</span>
-          <span>Strategy DSL</span>
-          <span>Structured Output</span>
+          <span>@Tool</span>
+          <span>ToolSet</span>
+          <span>strategy DSL</span>
         </div>
       </div>
 
       <div class="sample-card">
-        <h3>structured</h3>
-        <p>Direct structured LLM call (no agent). Generates a fictional weather forecast as a typed Kotlin data class.</p>
+        <h3>Structured.kt</h3>
+        <p>Fictional weather forecast emitted as a typed Kotlin data class. Uses a schema-fixing parser to coerce imperfect LLM output.</p>
         <div class="concepts">
-          <span>JsonStructuredData</span>
           <span>executeStructured</span>
-          <span>JSON Schema</span>
+          <span>StructureFixingParser</span>
+          <span>@LLMDescription</span>
         </div>
       </div>
 
       <div class="sample-card">
-        <h3>structured_strategy</h3>
-        <p>Same weather forecast but driven through an agent strategy with a custom node that requests structured output.</p>
+        <h3>MiejskiBike.kt</h3>
+        <p>Interactive chat that queries the <a href="https://miejski.bike" style="color: var(--text-muted)">miejski.bike</a> API for bike points in Polish cities. Ktor HTTP tool with enum parameters and an ASCII-table renderer.</p>
         <div class="concepts">
-          <span>Agent Strategy</span>
-          <span>Custom Node</span>
-          <span>requestLLMStructured</span>
-        </div>
-      </div>
-
-      <div class="sample-card">
-        <h3>miejskibike</h3>
-        <p>Agent that queries the miejski.bike API to find bike racks, wrenches, and workshops in Polish cities. Returns structured location data.</p>
-        <div class="concepts">
-          <span>HTTP Tool</span>
-          <span>Ktor Client</span>
+          <span>Ktor HTTP Tool</span>
           <span>Enum Params</span>
           <span>Live API</span>
         </div>
       </div>
 
       <div class="sample-card">
-        <h3>lmstudio</h3>
-        <p>Custom LLMClient implementation that connects to LM Studio's OpenAI-compatible API, enabling non-Ollama backends.</p>
+        <h3>utils.kt</h3>
+        <p>Shared config &mdash; <code>lmStudioExecutor()</code>, <code>ollamaExecutor()</code>, the <code>SayToUser</code> tool, and <code>LmStudioOpenAIClient</code> with the Qwen reasoning-content fix.</p>
         <div class="concepts">
-          <span>Custom LLMClient</span>
-          <span>LM Studio</span>
-          <span>Ktor POST</span>
+          <span>LmStudioOpenAIClient</span>
+          <span>Shared Config</span>
         </div>
       </div>
 
@@ -125,38 +116,78 @@
   <!-- ARCHITECTURE -->
   <section id="architecture">
     <div class="section-label">Architecture</div>
-    <h2>How it fits together</h2>
-    <p>All samples follow the same Koog pattern: define a strategy (node graph with edges), configure the agent (prompt + model), register tools, and run.</p>
+    <h2>Node-graph strategy pattern</h2>
+    <p>Koog agents are directed graphs of typed nodes. Edges pick the next node based on the LLM's response &mdash; a text message finishes the run, tool calls route through an execute/parse chain.</p>
 
-    <pre><span class="comment">// Shared model config — switch once, applies everywhere</span>
-<span class="keyword">val</span> ollama_model = gpt_oss_20b
-
-<span class="comment">// Define strategy as a node graph</span>
-<span class="keyword">val</span> strategy = strategy(<span class="string">"name"</span>) {
-    <span class="keyword">val</span> sendInput <span class="keyword">by</span> nodeLLMRequest()
-    <span class="keyword">val</span> executeTool <span class="keyword">by</span> nodeExecuteTool()
-    <span class="keyword">val</span> sendResult <span class="keyword">by</span> nodeLLMSendToolResult()
-    edge(nodeStart forwardTo sendInput)
-    edge(sendInput forwardTo executeTool)
-    <span class="comment">// ...</span>
-}
-
-<span class="comment">// Create and run agent</span>
-<span class="keyword">val</span> agent = AIAgent(
-    promptExecutor = simpleOllamaAIExecutor(),
-    strategy = strategy,
-    agentConfig = config,
-    toolRegistry = registry
-)
-agent.run(<span class="string">"user prompt"</span>)</pre>
+    <pre><span class="comment">// Strategy flow</span>
+nodeStart &rarr; nodeLLMRequest &rarr; (text)       &rarr; nodeFinish
+                            &rarr; (tool calls) &rarr; nodeExecuteTools &rarr; nodeParseResult &rarr; nodeFinish</pre>
 
     <ul class="arch-list">
-      <li><code>common/utils.kt</code> &mdash; Shared Ollama model definitions and event handler. Change <code>ollama_model</code> to switch the active model globally.</li>
-      <li><code>Tool&lt;Args, Result&gt;</code> &mdash; Custom tools define a <code>ToolDescriptor</code> (name, description, parameters) and an <code>execute()</code> method.</li>
-      <li><code>JsonStructuredData</code> &mdash; Generates JSON Schema from a Kotlin <code>@Serializable</code> class and coerces LLM output into typed objects.</li>
-      <li><code>EventHandler</code> &mdash; Lifecycle hooks (onToolCall, onAfterLLMCall, onAgentFinished) for logging and debugging.</li>
-      <li><code>LMStudioClient</code> &mdash; Shows how to swap the LLM backend by implementing the <code>LLMClient</code> interface with Ktor HTTP calls.</li>
+      <li><strong>Strategy</strong> &mdash; a directed graph of typed nodes connected by conditional edges.</li>
+      <li><strong>Nodes</strong> &mdash; typed <code>Input &rarr; Output</code> units. Built-in helpers: <code>nodeLLMRequest</code>, <code>nodeExecuteTools</code>.</li>
+      <li><strong>Edges</strong> &mdash; <code>onTextMessage { }</code> / <code>onToolCalls { }</code> conditions select which path to take.</li>
+      <li><strong>Tools</strong> &mdash; implement <code>Tool&lt;Args, Result&gt;</code> with a <code>ToolDescriptor</code>, or use <code>@Tool</code> annotations on a <code>ToolSet</code>.</li>
+      <li><strong>Structured output</strong> &mdash; <code>requestLLMStructured&lt;T&gt;()</code> inside <code>llm.writeSession { }</code> asks the LLM to emit a JSON-schema-validated <code>T</code>.</li>
     </ul>
+  </section>
+
+  <!-- MIEJSKIBIKE -->
+  <section id="miejskibike">
+    <div class="section-label">Highlight</div>
+    <h2>MiejskiBike Chat</h2>
+    <p>Interactive bike-points assistant for Polish cities. Queries the <code>storage.miejski.bike</code> API for real-time data on racks, wrenches, and workshops.</p>
+
+    <div class="operation-grid">
+      <div class="op-card">
+        <h3><span class="indicator on"></span> Zones</h3>
+        <p>Supported cities queried via enum parameter on the tool.</p>
+        <div class="state">lodz &middot; warszawa &middot; poznan</div>
+      </div>
+      <div class="op-card">
+        <h3><span class="indicator on"></span> Types</h3>
+        <p>Point kinds available in each zone.</p>
+        <div class="state">rack &middot; wrench &middot; workshop</div>
+      </div>
+    </div>
+
+    <pre>    __  ____        _      __   _    ____  _ __           ________          __
+   /  |/  (_)__    (_)____/ /__(_)  / __ )(_) /_____     / ____/ /_  ____ _/ /_
+  / /|_/ / / _ \  / / ___/ //_/ /  / __  / / //_/ _ \   / /   / __ \/ __ `/ __/
+ / /  / / /  __/ / (__  ) ,&lt; / /  / /_/ / / ,&lt; /  __/  / /___/ / / / /_/ / /_
+/_/  /_/_/\___/_/ /____/_/|_/_/  /_____/_/_/|_|\___/   \____/_/ /_/\__,_/\__/
+
+You: show me racks in warszawa
+
+  &gt; [miejski.bike] type=rack  zone=warszawa
+  &gt; [miejski.bike] 5 result(s) found
+
+RACK in WARSZAWA &mdash; 5 point(s)
++---+------------------------------+------------+------------+
+| # | Name                         | Latitude   | Longitude  |
++---+------------------------------+------------+------------+
+| 1 | Stacja Veturilo Centrum      | 52.229676  | 21.012229  |
+...
++---+------------------------------+------------+------------+
+
+You: /exit</pre>
+  </section>
+
+  <!-- QUIRKS -->
+  <section id="quirks">
+    <div class="section-label">Known Issues</div>
+    <h2>Quirks worth knowing</h2>
+
+    <h3 style="font-size: 16px; font-weight: 500; margin-top: 24px; margin-bottom: 8px;">Qwen reasoning content</h3>
+    <p>LM Studio routes Qwen's thinking output into <code>reasoning_content</code> and leaves <code>content</code> empty. This breaks two things:</p>
+    <ul class="arch-list">
+      <li><strong>Structured output</strong> &mdash; Koog's parser calls <code>.single()</code> on <code>MessagePart.Text</code> and fails when there are no text parts. Fix: promote <code>reasoning_content</code> to a <code>Text</code> part when no text is present.</li>
+      <li><strong>Tool calls</strong> &mdash; if reasoning is promoted unconditionally, messages with both reasoning and tool calls end up with a <code>Text</code> part, causing <code>onTextMessage</code> to fire before <code>onToolCalls</code>. Fix: skip promotion when <code>MessagePart.Tool.Call</code> parts are already present.</li>
+    </ul>
+    <p>Both fixes live in <code>LmStudioOpenAIClient.promoteReasoningToText()</code> in <code>utils.kt</code>.</p>
+
+    <h3 style="font-size: 16px; font-weight: 500; margin-top: 32px; margin-bottom: 8px;">Direct parsing vs. <code>requestLLMStructured</code></h3>
+    <p><code>requestLLMStructured&lt;T&gt;</code> is suited for having the LLM <em>generate</em> structured data. When a tool already returns typed objects (e.g. <code>BikeResult</code>), pass the data through directly by mapping <code>ReceivedToolResults</code> in a custom node &mdash; letting the LLM reformat it risks truncation.</p>
   </section>
 
   <!-- SETUP -->
@@ -166,24 +197,49 @@ agent.run(<span class="string">"user prompt"</span>)</pre>
 
     <div class="operation-grid">
       <div class="op-card">
-        <h3><span class="indicator on"></span> Ollama</h3>
-        <p>Install from <a href="https://ollama.com/" style="color: var(--text-muted)">ollama.com</a>, then pull models:</p>
-        <div class="state">ollama pull llama3.2<br>ollama pull gpt-oss:20b</div>
+        <h3><span class="indicator on"></span> LM Studio</h3>
+        <p>Primary backend. Install from <a href="https://lmstudio.ai/" style="color: var(--text-muted)">lmstudio.ai</a>, load a model, start the local API server (default <code>http://localhost:1234</code>).</p>
+        <div class="state">model: qwen/qwen3.5-35b-a3b</div>
       </div>
       <div class="op-card">
-        <h3><span class="indicator off"></span> LM Studio</h3>
-        <p>Optional. Install from <a href="https://lmstudio.ai/" style="color: var(--text-muted)">lmstudio.ai</a>, load a model, start the API server.</p>
-        <div class="state">Only needed for lmstudio sample</div>
+        <h3><span class="indicator off"></span> Ollama</h3>
+        <p>Alternative backend. Pull a model, then switch <code>ollama_model</code> in <code>utils.kt</code>.</p>
+        <div class="state">ollama pull gpt-oss:20b</div>
       </div>
     </div>
 
-    <pre><span class="comment"># Build</span>
+    <pre><span class="comment"># Build &amp; test</span>
 ./gradlew build
+./gradlew test</pre>
 
-<span class="comment"># Run a specific sample</span>
-./gradlew run -PmainClass=org.example.basic.MainKt
-./gradlew run -PmainClass=org.example.calc.MainKt
-./gradlew run -PmainClass=org.example.miejskibike.MainKt</pre>
+    <p>Run samples from your IDE by executing each file's <code>main()</code>, or via the application plugin with the fully-qualified class name:</p>
+
+    <table class="bom-table">
+      <thead>
+        <tr>
+          <th>Sample</th>
+          <th>Main class</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Chat</td>
+          <td>pl.wtopolski.koog.samples.ChatKt</td>
+        </tr>
+        <tr>
+          <td>Calc</td>
+          <td>pl.wtopolski.koog.samples.CalcKt</td>
+        </tr>
+        <tr>
+          <td>Structured</td>
+          <td>pl.wtopolski.koog.samples.StructuredKt</td>
+        </tr>
+        <tr>
+          <td>MiejskiBike</td>
+          <td>pl.wtopolski.koog.samples.MiejskiBikeKt</td>
+        </tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- FOOTER -->
