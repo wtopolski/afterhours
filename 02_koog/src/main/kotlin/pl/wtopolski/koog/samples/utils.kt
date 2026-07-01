@@ -123,6 +123,8 @@ class LmStudioOpenAIClient(
     private fun promoteReasoningToText(response: Message.Assistant): Message.Assistant {
         val hasText = response.parts.any { it is MessagePart.Text }
         if (hasText) return response
+        val hasToolCalls = response.parts.any { it is MessagePart.Tool.Call }
+        if (hasToolCalls) return response
         val reasoningText = response.parts
             .filterIsInstance<MessagePart.Reasoning>()
             .flatMap { it.content }

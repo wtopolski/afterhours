@@ -7,22 +7,18 @@ import ai.koog.agents.core.agent.config.AIAgentConfig
 import ai.koog.agents.core.annotation.InternalAgentsApi
 import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
+import ai.koog.agents.core.dsl.extension.ReceivedToolResults
 import ai.koog.agents.core.dsl.extension.nodeExecuteTools
 import ai.koog.agents.core.dsl.extension.nodeLLMRequest
 import ai.koog.agents.core.dsl.extension.onTextMessage
 import ai.koog.agents.core.dsl.extension.onToolCalls
-import ai.koog.agents.core.dsl.extension.ReceivedToolResults
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.agents.core.tools.ToolParameterDescriptor
 import ai.koog.agents.core.tools.ToolParameterType
 import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.agents.core.tools.annotations.LLMDescription
-import ai.koog.prompt.Prompt
-import ai.koog.prompt.executor.clients.openai.OpenAIClientSettings
-import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
-import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
-import ai.koog.prompt.llm.LLMProvider
+import ai.koog.prompt.dsl.prompt
 import ai.koog.serialization.JSONPrimitive
 import ai.koog.serialization.typeToken
 import io.ktor.client.HttpClient
@@ -32,7 +28,6 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.port
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.request
 import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.serialization.kotlinx.json.json
@@ -40,22 +35,14 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-private val lmStudioExecutor = MultiLLMPromptExecutor(
-    LLMProvider.OpenAI to OpenAILLMClient(
-        apiKey = "lm-studio",
-        settings = OpenAIClientSettings(baseUrl = LM_STUDIO_BASE_URL)
-    )
-)
+private val lmStudioExecutor = lmStudioExecutor()
 
-// Create a simple strategy
 val mbAgentStrategy = strategy<String, Any>("Bike points Location Assistant of miejski.bike service") {
     val nodeSendInput by nodeLLMRequest()
     val nodeExecuteTool by nodeExecuteTools()
-    // Parse ResponseDescription directly from tool results — avoids a second LLM call,
-    // which fails on LM Studio/Qwen because its jinja template can't handle tool_calls history.
     @OptIn(InternalAgentsApi::class)
     val nodeParseResult by node<ReceivedToolResults, ResponseDescription> { toolResults ->
-        val toolResult = toolResults.toolResults.firstOrNull() ?: error("No tool result found")
+        val toolResult = toolResults.toolResults.firstOrNull() ?: return@node ResponseDescription()
         val zoneId = (toolResult.toolArgs.entries["zoneId"] as? JSONPrimitive)?.content ?: ""
         val typeId = (toolResult.toolArgs.entries["typeId"] as? JSONPrimitive)?.content ?: ""
         val bikeResult = toolResult.resultObject as? BikeResult
@@ -63,38 +50,29 @@ val mbAgentStrategy = strategy<String, Any>("Bike points Location Assistant of m
             bikeType = typeId,
             zoneName = zoneId,
             numberOfPoint = bikeResult?.content?.size ?: 0,
-            bikePoints = bikeResult?.content?.map {
-                BikePointDescription(it.name, it.locationLat, it.locationLng)
-            } ?: emptyList()
+            bikePoints = bikeResult?.content?.map { BikePointDescription(it.name, it.locationLat, it.locationLng) } ?: emptyList()
         )
     }
 
     edge(nodeStart forwardTo nodeSendInput)
-
-    edge(
-        (nodeSendInput forwardTo nodeFinish) onTextMessage { true }
-    )
-
-    edge(
-        (nodeSendInput forwardTo nodeExecuteTool) onToolCalls { true }
-    )
-
+    edge((nodeSendInput forwardTo nodeFinish) onTextMessage { true })
+    edge((nodeSendInput forwardTo nodeExecuteTool) onToolCalls { true })
     edge(nodeExecuteTool forwardTo nodeParseResult)
-
     edge(nodeParseResult forwardTo nodeFinish)
 }
 
 suspend fun main() {
     val agentConfig = AIAgentConfig(
-        prompt = Prompt.build("miejski-bike") {
+        prompt = prompt("miejski-bike") {
             system(
                 """
-                You are a Bike Points Location Assistant. 
-                
-                You provide details for specific bike points locations. When the user requests a location or city, extract its ID. 
+                You are a Bike Points Location Assistant.
+
+                You provide details for specific bike points locations. When the user requests a location or city, extract its ID.
                 The response includes all fetched data about the points.
-                
-                Use only data from registered tools.
+
+                Use only data from registered tools. Call the tool immediately without any explanation or preamble.
+                /no_think
                 """.trimIndent()
             )
         },
@@ -102,12 +80,10 @@ suspend fun main() {
         maxAgentIterations = 10
     )
 
-    // Create the tool to the tool registry
     val toolRegistry = ToolRegistry {
         tools(listOf(SayToUser, MiejskiBikeTool))
     }
 
-    // Create the agent
     val agent = AIAgent(
         promptExecutor = lmStudioExecutor,
         strategy = mbAgentStrategy,
@@ -115,18 +91,63 @@ suspend fun main() {
         toolRegistry = toolRegistry
     )
 
-//    val resultA = agent.run("""Where can I park my bike in Poznań use data from miejski bike service, give me addresses or names!""")
-//    println(resultA)
+    printLogo()
 
-    val result =
-        agent.run("""Find all workshops where I can fix my bike in Poznan use data from miejski bike service, give me addresses!""")
-    if (result is ResponseDescription) {
-        println("Type: ${result.bikeType} from ${result.zoneName}, number of points: ${result.numberOfPoint}")
-        println("------------------------------")
-        result.bikePoints.forEach {
-            println(it)
-        }
+    while (true) {
+        print("You: ")
+        val input = readLine() ?: break
+        if (input == "/exit") break
+        val result = agent.run(input)
+        if (result is ResponseDescription) printBikePoints(result)
+        else println(result)
     }
+}
+
+private fun printLogo() {
+    println("""
+    __  ____        _      __   _    ____  _ __           ________          __
+   /  |/  (_)__    (_)____/ /__(_)  / __ )(_) /_____     / ____/ /_  ____ _/ /_
+  / /|_/ / / _ \  / / ___/ //_/ /  / __  / / //_/ _ \   / /   / __ \/ __ `/ __/
+ / /  / / /  __/ / (__  ) ,< / /  / /_/ / / ,< /  __/  / /___/ / / / /_/ / /_
+/_/  /_/_/\___/_/ /____/_/|_/_/  /_____/_/_/|_|\___/   \____/_/ /_/\__,_/\__/
+             /___/
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Ask about bike racks, workshops, and wrench stations in Lodz, Warszawa, Poznan.
+ Type /exit to quit.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    """.trimIndent())
+}
+
+private fun printBikePoints(result: ResponseDescription) {
+    val title = "${result.bikeType.uppercase()} in ${result.zoneName.uppercase()} — ${result.numberOfPoint} point(s)"
+
+    if (result.bikePoints.isEmpty()) {
+        println("\n$title\nNo points found.\n")
+        return
+    }
+
+    val rows = result.bikePoints.mapIndexed { i, p ->
+        listOf("${i + 1}", p.name, "%.6f".format(p.locationLat), "%.6f".format(p.locationLng))
+    }
+    val headers = listOf("#", "Name", "Latitude", "Longitude")
+    val cols = headers.indices.map { col ->
+        maxOf(headers[col].length, rows.maxOf { it[col].length })
+    }
+
+    fun row(cells: List<String>, left: String, mid: String, right: String) =
+        left + cells.mapIndexed { i, c -> " ${c.padEnd(cols[i])} " }.joinToString(mid) + right
+
+    fun divider(left: String, mid: String, right: String, fill: String) =
+        left + cols.joinToString(mid) { fill.repeat(it + 2) } + right
+
+    println()
+    println(title)
+    println(divider("+", "+", "+", "-"))
+    println(row(headers, "|", "|", "|"))
+    println(divider("+", "+", "+", "-"))
+    rows.forEach { println(row(it, "|", "|", "|")) }
+    println(divider("+", "+", "+", "-"))
+    println()
 }
 
 object MiejskiBikeTool : Tool<BikeRequestArgs, BikeResult>(
@@ -149,16 +170,15 @@ object MiejskiBikeTool : Tool<BikeRequestArgs, BikeResult>(
         )
     )
 ) {
-    override suspend fun execute(args: BikeRequestArgs): BikeResult {
-        val client = HttpClient(CIO) {
-            install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                })
-            }
+    private val httpClient = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
         }
+    }
 
-        val httpResponse: HttpResponse = client.get(
+    override suspend fun execute(args: BikeRequestArgs): BikeResult {
+        println("\n  > [miejski.bike] type=${args.typeId}  zone=${args.zoneId}")
+        val httpResponse: HttpResponse = httpClient.get(
             urlString = "https://storage.miejski.bike",
             block = {
                 headers.append(HttpHeaders.ContentType, "application/json")
@@ -172,32 +192,21 @@ object MiejskiBikeTool : Tool<BikeRequestArgs, BikeResult>(
             }
         )
 
-        try {
+        return try {
             val typeId = "${args.typeId}_${args.zoneId}".lowercase()
-            println("execute ----------> args: $args request: " + httpResponse.request.url)
-
             val response = httpResponse.body<List<DTOBikePoint>>()
                 .filter { bikePoint -> bikePoint.typeId == typeId }
                 .take(10)
                 .map { point ->
                     val name = point.attrs.firstOrNull() { it.key == "name" }?.value
                     val address = point.attrs.firstOrNull() { it.key == "address" }?.value
-                    val finalName = name ?: address ?: "no name"
-                    BikePoint(name = finalName, locationLat = point.location.lat, locationLng = point.location.lng)
+                    BikePoint(name = name ?: address ?: "no name", locationLat = point.location.lat, locationLng = point.location.lng)
                 }
-
-            client.close()
-
-            println("execute ----------> zoneId: " + args.zoneId + " size: " + response.size)
-
-            response.forEach {
-                println("point: $it")
-            }
-
-            return BikeResult(response)
+            println("  > [miejski.bike] ${response.size} result(s) found")
+            BikeResult(response)
         } catch (error: Exception) {
-            println("execute ----------> error: $error")
-            return BikeResult(emptyList())
+            println("  > [miejski.bike] error: $error")
+            BikeResult(emptyList())
         }
     }
 }
@@ -253,18 +262,13 @@ enum class ZoneTypes {
     lodz, warszawa, poznan
 }
 
-// Create sample forecasts
-val exampleForecasts = listOf(
+val bikePointsExamples = listOf(
     ResponseDescription(
         bikeType = "workshop",
         zoneName = "warszawa",
         numberOfPoint = 1,
         bikePoints = listOf(
-            BikePointDescription(
-                name = "Mój rower",
-                locationLat = 50.02,
-                locationLng = 22.8
-            )
+            BikePointDescription(name = "Mój rower", locationLat = 50.02, locationLng = 22.8)
         )
     ),
     ResponseDescription(
@@ -272,30 +276,15 @@ val exampleForecasts = listOf(
         zoneName = "lodz",
         numberOfPoint = 2,
         bikePoints = listOf(
-            BikePointDescription(
-                name = "Mój rower",
-                locationLat = 50.02,
-                locationLng = 22.8
-            ),
-            BikePointDescription(
-                name = "Mój rower 2",
-                locationLat = 40.02,
-                locationLng = 28.8
-            )
+            BikePointDescription(name = "Mój rower", locationLat = 50.02, locationLng = 22.8),
+            BikePointDescription(name = "Mój rower 2", locationLat = 40.02, locationLng = 28.8)
         )
     ),
-    ResponseDescription(
-        bikeType = "rack",
-        zoneName = "poznan",
-        numberOfPoint = 0
-    )
+    ResponseDescription(bikeType = "rack", zoneName = "poznan", numberOfPoint = 0)
 )
 
-// Examples for structured output
-val bikePointsExamples = exampleForecasts
-
 @Serializable
-@SerialName("BikePointDescription")
+@SerialName("ResponseDescription")
 @LLMDescription("Description of response from miejski bike service")
 data class ResponseDescription(
     @property:LLMDescription("Type of points that are requested")
