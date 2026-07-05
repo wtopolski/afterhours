@@ -12,9 +12,10 @@
     <div class="brand"><a href="../">afterhours</a> / <span>03</span> kotlin mcp</div>
     <ul>
       <li><a href="#overview">Overview</a></li>
-      <li><a href="#tools">Tools</a></li>
       <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#tools">Tools</a></li>
       <li><a href="#setup">Setup</a></li>
+      <li><a href="https://github.com/wtopolski/afterhours/tree/main/03_kotlin_mcp">source</a></li>
     </ul>
   </nav>
 
@@ -51,6 +52,27 @@
     </div>
 
     <img class="thumb" src="logo.png" alt="Miejski Bike MCP logo" style="max-width: 240px; margin-top: 32px; display: block;">
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section id="architecture">
+    <div class="section-label">Architecture</div>
+    <h2>How it works</h2>
+    <p>A single <code>main.kt</code> (~240 lines) wires up an MCP <code>Server</code>, registers three tools, and connects over stdio. Each tool delegates to a <code>suspend</code> function that calls the miejski.bike REST API via Ktor's CIO client.</p>
+
+    <pre><span class="comment">// Request flow</span>
+Client (e.g. Claude) &rarr; stdio MCP &rarr; Server.addTool { }
+                               &rarr; fetchFromApi("api", "v1", ...)
+                               &rarr; Ktor CIO HTTP client
+                               &rarr; kotlinx.serialization JSON
+                               &rarr; CallToolResult back to client</pre>
+
+    <ul class="arch-list">
+      <li><strong>MCP Server</strong> &mdash; built with <code>modelcontextprotocol/kotlin-sdk</code>, exposes capabilities with <code>tools/listChanged = true</code>.</li>
+      <li><strong>HTTP client</strong> &mdash; Ktor CIO engine with ContentNegotiation + kotlinx.serialization JSON, configured with auth and Polish locale headers.</li>
+      <li><strong>Data classes</strong> &mdash; <code>@Serializable</code> DTOs (<code>DTOBikePoint</code>, <code>DTOZone</code>, <code>DTOPoiType</code>) map the REST API response shape; domain types (<code>BikePoint</code>, <code>BikeZone</code>, <code>BikeZoneType</code>) are returned to the client.</li>
+      <li><strong>Error handling</strong> &mdash; missing environment variable exits with a clear message; API failures return empty lists silently.</li>
+    </ul>
   </section>
 
   <!-- TOOLS -->
@@ -90,27 +112,6 @@
       </div>
 
     </div>
-  </section>
-
-  <!-- ARCHITECTURE -->
-  <section id="architecture">
-    <div class="section-label">Architecture</div>
-    <h2>How it works</h2>
-    <p>A single <code>main.kt</code> (~240 lines) wires up an MCP <code>Server</code>, registers three tools, and connects over stdio. Each tool delegates to a <code>suspend</code> function that calls the miejski.bike REST API via Ktor's CIO client.</p>
-
-    <pre><span class="comment">// Request flow</span>
-Client (e.g. Claude) &rarr; stdio MCP &rarr; Server.addTool { }
-                               &rarr; fetchFromApi("api", "v1", ...)
-                               &rarr; Ktor CIO HTTP client
-                               &rarr; kotlinx.serialization JSON
-                               &rarr; CallToolResult back to client</pre>
-
-    <ul class="arch-list">
-      <li><strong>MCP Server</strong> &mdash; built with <code>modelcontextprotocol/kotlin-sdk</code>, exposes capabilities with <code>tools/listChanged = true</code>.</li>
-      <li><strong>HTTP client</strong> &mdash; Ktor CIO engine with ContentNegotiation + kotlinx.serialization JSON, configured with auth and Polish locale headers.</li>
-      <li><strong>Data classes</strong> &mdash; <code>@Serializable</code> DTOs (<code>DTOBikePoint</code>, <code>DTOZone</code>, <code>DTOPoiType</code>) map the REST API response shape; domain types (<code>BikePoint</code>, <code>BikeZone</code>, <code>BikeZoneType</code>) are returned to the client.</li>
-      <li><strong>Error handling</strong> &mdash; missing environment variable exits with a clear message; API failures return empty lists silently.</li>
-    </ul>
   </section>
 
   <!-- SETUP -->

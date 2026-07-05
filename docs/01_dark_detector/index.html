@@ -12,10 +12,12 @@
     <div class="brand"><a href="../">afterhours</a> / <span>01</span> dark_detector</div>
     <ul>
       <li><a href="#overview">Overview</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
       <li><a href="#schematic">Schematic</a></li>
       <li><a href="#bom">BOM</a></li>
       <li><a href="#pcb">PCB</a></li>
       <li><a href="#build">Build</a></li>
+      <li><a href="https://github.com/wtopolski/afterhours/tree/main/01_dark_detector">source</a></li>
     </ul>
   </nav>
 
@@ -29,21 +31,8 @@
   <!-- OVERVIEW -->
   <section id="overview">
     <div class="section-label">Overview</div>
-    <h2>How it works</h2>
-    <p>A photoresistor and a 10k&Omega; resistor form a voltage divider that controls the base of a BC546B NPN transistor. In darkness the LDR resistance rises, forward-biasing the transistor, which switches on the LED through a 220&Omega; current-limiting resistor.</p>
-
-    <div class="operation-grid">
-      <div class="op-card">
-        <h3><span class="indicator off"></span> Bright</h3>
-        <p>LDR resistance is low. Voltage divider pulls the base below 0.7V threshold. Transistor is cut off.</p>
-        <div class="state">LED &rarr; OFF</div>
-      </div>
-      <div class="op-card">
-        <h3><span class="indicator on"></span> Dark</h3>
-        <p>LDR resistance is high. Base voltage rises above 0.7V. Transistor saturates and current flows through the LED.</p>
-        <div class="state">LED &rarr; ON</div>
-      </div>
-    </div>
+    <h2>What this is</h2>
+    <p>A USB-C powered light-dependent LED driver. The circuit senses ambient light through a photoresistor and activates an LED in darkness &mdash; a minimal analog night-light.</p>
 
     <div class="specs">
       <div class="spec">
@@ -65,6 +54,33 @@
     </div>
   </section>
 
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works">
+    <div class="section-label">How it works</div>
+    <h2>Circuit operation</h2>
+    <p>A photoresistor and a 10k&Omega; resistor form a voltage divider that controls the base of a BC546B NPN transistor. In darkness the LDR resistance rises, forward-biasing the transistor, which switches on the LED through a 220&Omega; current-limiting resistor.</p>
+
+    <div class="operation-grid">
+      <div class="op-card">
+        <h3><span class="indicator off"></span> Bright</h3>
+        <p>LDR resistance is low. Voltage divider pulls the base below 0.7V threshold. Transistor is cut off.</p>
+        <div class="state">LED &rarr; OFF</div>
+      </div>
+      <div class="op-card">
+        <h3><span class="indicator on"></span> Dark</h3>
+        <p>LDR resistance is high. Base voltage rises above 0.7V. Transistor saturates and current flows through the LED.</p>
+        <div class="state">LED &rarr; ON</div>
+      </div>
+    </div>
+
+    <div class="formula-block">
+      V_R2 = 5.0V &minus; 2.0V &minus; 0.2V = 2.8V<br>
+      I_LED = 2.8V / 220&Omega; = <span class="result">12.7 mA</span><br><br>
+      I_B = (1.2V &minus; 0.7V) / 10k&Omega; = 0.05 mA<br>
+      I_C = &beta; &times; I_B = 200 &times; 0.05 = <span class="result">10 mA</span>
+    </div>
+  </section>
+
   <!-- SCHEMATIC -->
   <section id="schematic">
     <div class="section-label">Schematic</div>
@@ -73,13 +89,6 @@
 
     <div class="schematic-img">
       <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/01_dark_detector/sheet.png" alt="Circuit schematic">
-    </div>
-
-    <div class="formula-block">
-      V_R2 = 5.0V &minus; 2.0V &minus; 0.2V = 2.8V<br>
-      I_LED = 2.8V / 220&Omega; = <span class="result">12.7 mA</span><br><br>
-      I_B = (1.2V &minus; 0.7V) / 10k&Omega; = 0.05 mA<br>
-      I_C = &beta; &times; I_B = 200 &times; 0.05 = <span class="result">10 mA</span>
     </div>
   </section>
 

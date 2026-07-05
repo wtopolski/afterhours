@@ -12,11 +12,12 @@
     <div class="brand"><a href="../">afterhours</a> / <span>02</span> koog</div>
     <ul>
       <li><a href="#overview">Overview</a></li>
-      <li><a href="#samples">Samples</a></li>
       <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#samples">Samples</a></li>
       <li><a href="#miejskibike">MiejskiBike</a></li>
       <li><a href="#quirks">Quirks</a></li>
       <li><a href="#setup">Setup</a></li>
+      <li><a href="https://github.com/wtopolski/afterhours/tree/main/02_koog">source</a></li>
     </ul>
   </nav>
 
@@ -51,6 +52,25 @@
         <div class="value">LM Studio<span class="unit"> / Ollama</span></div>
       </div>
     </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section id="architecture">
+    <div class="section-label">Architecture</div>
+    <h2>Node-graph strategy pattern</h2>
+    <p>Koog agents are directed graphs of typed nodes. Edges pick the next node based on the LLM's response &mdash; a text message finishes the run, tool calls route through an execute/parse chain.</p>
+
+    <pre><span class="comment">// Strategy flow</span>
+nodeStart &rarr; nodeLLMRequest &rarr; (text)       &rarr; nodeFinish
+                            &rarr; (tool calls) &rarr; nodeExecuteTools &rarr; nodeParseResult &rarr; nodeFinish</pre>
+
+    <ul class="arch-list">
+      <li><strong>Strategy</strong> &mdash; a directed graph of typed nodes connected by conditional edges.</li>
+      <li><strong>Nodes</strong> &mdash; typed <code>Input &rarr; Output</code> units. Built-in helpers: <code>nodeLLMRequest</code>, <code>nodeExecuteTools</code>.</li>
+      <li><strong>Edges</strong> &mdash; <code>onTextMessage { }</code> / <code>onToolCalls { }</code> conditions select which path to take.</li>
+      <li><strong>Tools</strong> &mdash; implement <code>Tool&lt;Args, Result&gt;</code> with a <code>ToolDescriptor</code>, or use <code>@Tool</code> annotations on a <code>ToolSet</code>.</li>
+      <li><strong>Structured output</strong> &mdash; <code>requestLLMStructured&lt;T&gt;()</code> inside <code>llm.writeSession { }</code> asks the LLM to emit a JSON-schema-validated <code>T</code>.</li>
+    </ul>
   </section>
 
   <!-- SAMPLES -->
@@ -111,25 +131,6 @@
       </div>
 
     </div>
-  </section>
-
-  <!-- ARCHITECTURE -->
-  <section id="architecture">
-    <div class="section-label">Architecture</div>
-    <h2>Node-graph strategy pattern</h2>
-    <p>Koog agents are directed graphs of typed nodes. Edges pick the next node based on the LLM's response &mdash; a text message finishes the run, tool calls route through an execute/parse chain.</p>
-
-    <pre><span class="comment">// Strategy flow</span>
-nodeStart &rarr; nodeLLMRequest &rarr; (text)       &rarr; nodeFinish
-                            &rarr; (tool calls) &rarr; nodeExecuteTools &rarr; nodeParseResult &rarr; nodeFinish</pre>
-
-    <ul class="arch-list">
-      <li><strong>Strategy</strong> &mdash; a directed graph of typed nodes connected by conditional edges.</li>
-      <li><strong>Nodes</strong> &mdash; typed <code>Input &rarr; Output</code> units. Built-in helpers: <code>nodeLLMRequest</code>, <code>nodeExecuteTools</code>.</li>
-      <li><strong>Edges</strong> &mdash; <code>onTextMessage { }</code> / <code>onToolCalls { }</code> conditions select which path to take.</li>
-      <li><strong>Tools</strong> &mdash; implement <code>Tool&lt;Args, Result&gt;</code> with a <code>ToolDescriptor</code>, or use <code>@Tool</code> annotations on a <code>ToolSet</code>.</li>
-      <li><strong>Structured output</strong> &mdash; <code>requestLLMStructured&lt;T&gt;()</code> inside <code>llm.writeSession { }</code> asks the LLM to emit a JSON-schema-validated <code>T</code>.</li>
-    </ul>
   </section>
 
   <!-- MIEJSKIBIKE -->
