@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Miejski Bike MCP — afterhours</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <nav>
+    <div class="brand"><a href="../">afterhours</a> / <span>03</span> kotlin mcp</div>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#setup">Setup</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="tag">afterhours / project 03</div>
+    <h1>Miejski Bike MCP</h1>
+    <p>A <a href="https://modelcontextprotocol.io/" style="color: var(--accent)">Model Context Protocol</a> server written in Kotlin that exposes <a href="https://miejski.bike" style="color: var(--accent)">miejski.bike</a> data &mdash; Polish public bike-share zones, racks, and POI types &mdash; as tools any MCP client (e.g. Claude) can call.</p>
+  </header>
+
+  <!-- OVERVIEW -->
+  <section id="overview">
+    <div class="section-label">Overview</div>
+    <h2>What this is</h2>
+    <p>A self-contained MCP server that communicates over stdio and is distributed as a fat JAR. It wraps the miejski.bike REST API behind three simple MCP tools, letting AI agents query bike-sharing infrastructure in Polish cities without writing HTTP clients.</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="label">Language</div>
+        <div class="value">Kotlin<span class="unit"> 2.1</span></div>
+      </div>
+      <div class="spec">
+        <div class="label">Runtime</div>
+        <div class="value">JVM<span class="unit"> 21</span></div>
+      </div>
+      <div class="spec">
+        <div class="label">Framework</div>
+        <div class="value">MCP SDK<span class="unit"> / Ktor</span></div>
+      </div>
+      <div class="spec">
+        <div class="label">Transport</div>
+        <div class="value">stdio</div>
+      </div>
+    </div>
+
+    <img class="thumb" src="logo.png" alt="Miejski Bike MCP logo" style="max-width: 240px; margin-top: 32px; display: block;">
+  </section>
+
+  <!-- TOOLS -->
+  <section id="tools">
+    <div class="section-label">Tools</div>
+    <h2>Exposed MCP tools</h2>
+
+    <div class="sample-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+
+      <div class="sample-card">
+        <h3>get_zones</h3>
+        <p>Returns all available miejski.bike zones — city/area IDs and display names. No arguments needed.</p>
+        <div class="concepts">
+          <span>zones</span>
+          <span>listing</span>
+        </div>
+      </div>
+
+      <div class="sample-card">
+        <h3>get_zone_types</h3>
+        <p>Returns POI types available within a given zone. Takes a <code>zoneId</code> string like <code>poznan</code>, <code>warszawa</code>, or <code>wroclaw</code>.</p>
+        <div class="concepts">
+          <span>types</span>
+          <span>rack</span>
+          <span>wrench</span>
+        </div>
+      </div>
+
+      <div class="sample-card">
+        <h3>get_bike_points</h3>
+        <p>Returns up to 10 bike rack points (name + GPS coordinates) for a given zone. Filtered by type and limited server-side.</p>
+        <div class="concepts">
+          <span>rack</span>
+          <span>GPS</span>
+          <span>10 max</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section id="architecture">
+    <div class="section-label">Architecture</div>
+    <h2>How it works</h2>
+    <p>A single <code>main.kt</code> (~240 lines) wires up an MCP <code>Server</code>, registers three tools, and connects over stdio. Each tool delegates to a <code>suspend</code> function that calls the miejski.bike REST API via Ktor's CIO client.</p>
+
+    <pre><span class="comment">// Request flow</span>
+Client (e.g. Claude) &rarr; stdio MCP &rarr; Server.addTool { }
+                               &rarr; fetchFromApi("api", "v1", ...)
+                               &rarr; Ktor CIO HTTP client
+                               &rarr; kotlinx.serialization JSON
+                               &rarr; CallToolResult back to client</pre>
+
+    <ul class="arch-list">
+      <li><strong>MCP Server</strong> &mdash; built with <code>modelcontextprotocol/kotlin-sdk</code>, exposes capabilities with <code>tools/listChanged = true</code>.</li>
+      <li><strong>HTTP client</strong> &mdash; Ktor CIO engine with ContentNegotiation + kotlinx.serialization JSON, configured with auth and Polish locale headers.</li>
+      <li><strong>Data classes</strong> &mdash; <code>@Serializable</code> DTOs (<code>DTOBikePoint</code>, <code>DTOZone</code>, <code>DTOPoiType</code>) map the REST API response shape; domain types (<code>BikePoint</code>, <code>BikeZone</code>, <code>BikeZoneType</code>) are returned to the client.</li>
+      <li><strong>Error handling</strong> &mdash; missing environment variable exits with a clear message; API failures return empty lists silently.</li>
+    </ul>
+  </section>
+
+  <!-- SETUP -->
+  <section id="setup">
+    <div class="section-label">Setup</div>
+    <h2>Getting started</h2>
+
+    <div class="operation-grid">
+      <div class="op-card">
+        <h3><span class="indicator on"></span> Build</h3>
+        <p>Produces a self-contained fat JAR at <code>build/libs/003-kotlin-mcp-1.0-SNAPSHOT-all.jar</code>.</p>
+        <div class="state">./gradlew fatJar</div>
+      </div>
+      <div class="op-card">
+        <h3><span class="indicator on"></span> Run</h3>
+        <p>Requires <code>MIEJSKI_BIKE_API_TOKEN</code> env var. Speaks MCP over stdio — not interactive.</p>
+        <div class="state">java -jar build/libs/*-all.jar</div>
+      </div>
+    </div>
+
+    <pre><span class="comment"># Register with Claude</span>
+claude mcp add --scope user --transport stdio miejski-bike \
+  -e MIEJSKI_BIKE_API_TOKEN=&lt;your-token&gt; \
+  -- java -jar "$(pwd)/build/libs/003-kotlin-mcp-1.0-SNAPSHOT-all.jar"</pre>
+
+    <table class="bom-table">
+      <thead>
+        <tr>
+          <th>Env variable</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>MIEJSKI_BIKE_API_TOKEN</td>
+          <td>Bearer token for the miejski.bike REST API</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>afterhours</span>
+    <a href="https://github.com/wtopolski/afterhours">github.com/wtopolski/afterhours</a>
+  </footer>
+
+</body>
+</html>
