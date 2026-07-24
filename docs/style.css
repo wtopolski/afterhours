@@ -561,6 +561,67 @@ footer {
   color: var(--text-dim);
 }
 
+/* ========================================
+   WORKBENCH LOG VARIANT
+   Opt-in via <body class="workbench"> on project subpages.
+   Palette: ink / paper / filament / phosphor.
+   Signature: HH:MM timestamps replace 01/02/03 markers.
+   ======================================== */
+
+body.workbench {
+  --bg: #1a2942;
+  --bg-elevated: #223351;
+  --bg-card: #223351;
+  --border: #33456a;
+  --text: #ecebe4;
+  --text-muted: #9daac0;
+  --text-dim: #62728a;
+  --accent: #f5a623;
+  --accent-dim: rgba(245, 166, 35, 0.14);
+  --phosphor: #7fb069;
+}
+
+body.workbench .hero h1 {
+  font-family: var(--mono);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  font-size: clamp(30px, 4.4vw, 46px);
+}
+
+body.workbench .hero .tag {
+  color: var(--accent);
+}
+
+body.workbench .log-line {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  max-width: 540px;
+  line-height: 1.9;
+}
+
+body.workbench .log-line .dot {
+  color: var(--border);
+  margin: 0 10px;
+}
+
+body.workbench .op-card .indicator.on {
+  background: var(--phosphor);
+  box-shadow: 0 0 8px var(--phosphor);
+}
+
+body.workbench .formula-block {
+  border-left-color: var(--phosphor);
+}
+
+body.workbench .formula-block .result {
+  color: var(--phosphor);
+}
+
 /* ---- RESPONSIVE ---- */
 
 @media (max-width: 640px) {
