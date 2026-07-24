@@ -1,6 +1,10 @@
 # macOS
 .DS_Store
 
+# Video assets — too large for git, keep locally
+*.mp4
+*.mov
+
 # IDE
 .idea/
 

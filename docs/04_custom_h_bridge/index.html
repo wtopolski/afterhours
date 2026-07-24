@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom H-bridge &mdash; afterhours</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="workbench">
+
+  <nav>
+    <div class="brand"><a href="../">afterhours</a> / <span>04</span> custom h-bridge</div>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#build">Build</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/H-bridge">wiki</a></li>
+      <li><a href="https://github.com/wtopolski/afterhours/tree/main/04_custom_h_bridge">source</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="tag">04 &middot; hardware log</div>
+    <h1>Custom H-bridge</h1>
+    <p>A discrete-transistor H-bridge for driving a small DC motor in both directions. Four switches arranged in an H around the load &mdash; the classic topology behind every motor controller, built from parts on the bench.</p>
+    <div class="log-line">worked 2026-07 <span class="dot">&middot;</span> in progress <span class="dot">&middot;</span> v0.1</div>
+  </header>
+
+  <!-- OVERVIEW -->
+  <section id="overview">
+    <div class="section-label">Overview</div>
+    <h2>What this is</h2>
+    <p>An H-bridge switches the polarity of the voltage applied to a load, letting a DC motor spin forward or reverse from a single-polarity supply. This build is a from-scratch version using discrete transistors rather than an integrated driver &mdash; the goal is to see every branch of the circuit, not to hide it behind a chip.</p>
+
+    <div class="specs">
+      <div class="spec">
+        <div class="label">Topology</div>
+        <div class="value">4-switch<span class="unit"> H</span></div>
+      </div>
+      <div class="spec">
+        <div class="label">Load</div>
+        <div class="value">DC motor</div>
+      </div>
+      <div class="spec">
+        <div class="label">States</div>
+        <div class="value">4</div>
+      </div>
+      <div class="spec">
+        <div class="label">Switching</div>
+        <div class="value">Discrete<span class="unit"> BJT / MOSFET</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works">
+    <div class="section-label">How it works</div>
+    <h2>Four switches, four states</h2>
+    <p>Four switches sit at the corners of an H, with the motor bridging the crossbar. Closing opposite diagonals connects the motor to the supply in one polarity; closing the other diagonal reverses it. The other two useful combinations disconnect the motor (coast) or short its terminals (brake).</p>
+
+    <div class="operation-grid">
+      <div class="op-card">
+        <h3><span class="indicator on"></span> Forward</h3>
+        <p>S1 and S4 closed. Current flows through the motor from left to right, spinning it in the forward direction.</p>
+        <div class="state">S1 + S4 &rarr; +V</div>
+      </div>
+      <div class="op-card">
+        <h3><span class="indicator on"></span> Reverse</h3>
+        <p>S2 and S3 closed. Current flows through the motor in the opposite direction; polarity is inverted, motor spins the other way.</p>
+        <div class="state">S2 + S3 &rarr; &minus;V</div>
+      </div>
+      <div class="op-card">
+        <h3><span class="indicator off"></span> Coast</h3>
+        <p>All switches open. Motor terminals disconnected from the supply; the rotor free-wheels on its own inertia.</p>
+        <div class="state">open &rarr; freewheel</div>
+      </div>
+      <div class="op-card">
+        <h3><span class="indicator off"></span> Brake</h3>
+        <p>Both low-side (or both high-side) switches closed. Motor terminals shorted; back-EMF dissipates and the rotor stops quickly.</p>
+        <div class="state">S3 + S4 &rarr; short</div>
+      </div>
+    </div>
+
+    <div class="formula-block">
+      <strong>Shoot-through &mdash; never do this:</strong><br>
+      S1 + S2 closed simultaneously &rarr; <span class="result">supply short-circuit</span><br>
+      S3 + S4 closed on the same leg &rarr; <span class="result">supply short-circuit</span><br><br>
+      Control logic must interlock same-leg switches. In practice, add dead-time between transitions.
+    </div>
+  </section>
+
+  <!-- BUILD -->
+  <section id="build">
+    <div class="section-label">Build</div>
+    <h2>From breadboard to bench</h2>
+    <p>Prototyped first on a breadboard with discrete transistors and resistors, driven by an Arduino UNO R4 running a simple switching loop. Once the four states behaved, the circuit was moved onto perfboard and hand-soldered. Final test bench uses a joystick shield feeding direction and speed into the bridge, spinning a small motor with a 3D-printed propeller.</p>
+
+    <div class="gallery">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/04_custom_h_bridge/photos/breadboard-wide.jpg" alt="First prototype on a breadboard">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/04_custom_h_bridge/photos/breadboard-detail.jpg" alt="Transistors and resistor network up close">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/04_custom_h_bridge/photos/arduino-code.jpg" alt="Arduino test code for driving the bridge">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/04_custom_h_bridge/photos/pcb-top.jpg" alt="Hand-soldered perfboard, component side">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/04_custom_h_bridge/photos/pcb-solder.jpg" alt="Perfboard solder side">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/04_custom_h_bridge/photos/test-rig.jpg" alt="Test rig with 3D-printed propeller on a helping-hand clamp">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/04_custom_h_bridge/photos/joystick-wired.jpg" alt="Joystick shield wired into the bridge for direction control">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/04_custom_h_bridge/photos/full-setup.jpg" alt="Complete test bench with power supply and joystick control">
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>afterhours</span>
+    <a href="https://github.com/wtopolski/afterhours">github.com/wtopolski/afterhours</a>
+  </footer>
+
+</body>
+</html>
