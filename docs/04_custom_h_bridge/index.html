@@ -13,6 +13,7 @@
     <ul>
       <li><a href="#overview">Overview</a></li>
       <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#schematic">Schematic</a></li>
       <li><a href="#build">Build</a></li>
       <li><a href="#sketch">Sketch</a></li>
       <li><a href="#tests">Tests</a></li>
@@ -26,7 +27,6 @@
     <div class="tag">04 &middot; hardware log</div>
     <h1>Custom H-bridge</h1>
     <p>A discrete-transistor H-bridge for driving a small DC motor in both directions. Four switches arranged in an H around the load &mdash; the classic topology behind every motor controller, built from parts on the bench.</p>
-    <div class="log-line">worked 2026-07 <span class="dot">&middot;</span> in progress <span class="dot">&middot;</span> v0.1</div>
   </header>
 
   <!-- OVERVIEW -->
@@ -90,6 +90,19 @@
       S3 + S4 closed on the same leg &rarr; <span class="result">supply short-circuit</span><br><br>
       Control logic must interlock same-leg switches. In practice, add dead-time between transitions.
     </div>
+  </section>
+
+  <!-- SCHEMATIC -->
+  <section id="schematic">
+    <div class="section-label">Schematic</div>
+    <h2>Reference topology</h2>
+    <p>The bench build follows the classic complementary-pair H-bridge shown below. Two PNP transistors (Q1, Q3) sit on the high side, two NPN transistors (Q2, Q4) on the low side; base resistors R1&ndash;R4 set drive current from four control inputs. The DC motor bridges the two mid-points. Flyback diodes D1&ndash;D4 sit anti-parallel across each transistor to clamp the inductive spike when the motor is switched off &mdash; without them, back-EMF would punch through the transistor junctions on every direction change.</p>
+    <p>To spin forward, pull Q1's base low (PNP on) and drive Q4's base high (NPN on): current flows VCC &rarr; Q1 &rarr; motor &rarr; Q4 &rarr; GND. Reversing means Q3 + Q2 instead. Same-leg pairs (Q1+Q2 or Q3+Q4) must never conduct simultaneously &mdash; that's the shoot-through path straight from VCC to GND.</p>
+
+    <div class="schematic-img">
+      <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/04_custom_h_bridge/photos/reference-schematic.png" alt="H-bridge reference schematic: four transistors with base resistors, flyback diodes, and a DC motor across the crossbar">
+    </div>
+    <p style="font-size: 13px; color: var(--text-dim); margin-top: 12px;">Diagram from <a href="https://www.build-electronic-circuits.com/h-bridge/" style="color: var(--accent)">build-electronic-circuits.com/h-bridge</a>.</p>
   </section>
 
   <!-- BUILD -->
