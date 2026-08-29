@@ -14,6 +14,7 @@
       <li><a href="#overview">Overview</a></li>
       <li><a href="#how-it-works">How it works</a></li>
       <li><a href="#build">Build</a></li>
+      <li><a href="#sketch">Sketch</a></li>
       <li><a href="#tests">Tests</a></li>
       <li><a href="https://en.wikipedia.org/wiki/H-bridge">wiki</a></li>
       <li><a href="https://github.com/wtopolski/afterhours/tree/main/04_custom_h_bridge">source</a></li>
@@ -107,6 +108,53 @@
       <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/04_custom_h_bridge/photos/joystick-wired.jpg" alt="Joystick shield wired into the bridge for direction control">
       <img src="https://raw.githubusercontent.com/wtopolski/afterhours/main/04_custom_h_bridge/photos/full-setup.jpg" alt="Complete test bench with power supply and joystick control">
     </div>
+  </section>
+
+  <!-- SKETCH -->
+  <section id="sketch">
+    <div class="section-label">Sketch</div>
+    <h2>Driving the bridge</h2>
+    <p>Minimal Arduino sketch used on the test bench &mdash; reads the joystick's X axis and drives the two control pins into one of three states: left, right, or stop. Anything inside the dead-band around center leaves both inputs low, so the motor coasts.</p>
+
+    <pre><span class="keyword">const byte</span> JOYSTICK_X_PIN = A0;
+<span class="keyword">const byte</span> MOTOR_IN1_PIN  = 10;
+<span class="keyword">const byte</span> MOTOR_IN2_PIN  = 11;
+
+<span class="keyword">const int</span> LEFT_THRESHOLD  = 300;
+<span class="keyword">const int</span> RIGHT_THRESHOLD = 400;
+
+<span class="keyword">void</span> setup() {
+  pinMode(MOTOR_IN1_PIN, OUTPUT);
+  pinMode(MOTOR_IN2_PIN, OUTPUT);
+  stopMotor();
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="keyword">int</span> x = analogRead(JOYSTICK_X_PIN);
+
+  <span class="keyword">if</span> (x &lt; LEFT_THRESHOLD) {
+    driveLeft();
+  } <span class="keyword">else if</span> (x &gt; RIGHT_THRESHOLD) {
+    driveRight();
+  } <span class="keyword">else</span> {
+    stopMotor();
+  }
+}
+
+<span class="keyword">void</span> driveLeft() {
+  digitalWrite(MOTOR_IN1_PIN, HIGH);
+  digitalWrite(MOTOR_IN2_PIN, LOW);
+}
+
+<span class="keyword">void</span> driveRight() {
+  digitalWrite(MOTOR_IN1_PIN, LOW);
+  digitalWrite(MOTOR_IN2_PIN, HIGH);
+}
+
+<span class="keyword">void</span> stopMotor() {
+  digitalWrite(MOTOR_IN1_PIN, LOW);
+  digitalWrite(MOTOR_IN2_PIN, LOW);
+}</pre>
   </section>
 
   <!-- TESTS -->
